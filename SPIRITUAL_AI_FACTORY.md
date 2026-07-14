@@ -48,6 +48,18 @@ The Sales department treats website chat and eligible social-inbox replies as it
 
 The factory never interprets the existence of a send endpoint as permission to contact someone. The runtime rejects email and social-message actions unless their approval context includes the stable recipient, exact message, relationship or consent basis, channel, dated suppression check, platform-eligibility confirmation, AI disclosure, and idempotency key. Opt-in outreach also requires dated consent evidence. Changed recipients or content require a new approval. Scraped private data, fake accounts, impersonation, duplicate outreach, and bypassing platform limits are prohibited.
 
+## Agent infrastructure providers
+
+The factory uses five provider boundaries for capabilities that should not run inside the main application process:
+
+- AgentMail provides one dedicated company-agent inbox. Provisioning and sends remain approval-gated.
+- Composio provides private, per-owner OAuth connections. Exact tools are action-mapped and toolkit versions are pinned before execution.
+- Orgo provides persistent cloud desktops. Every view or control operation requires approval.
+- Firecrawl provides bounded public-web search and single-page extraction; private and local targets are blocked.
+- E2B provides short-lived isolated command execution and destroys the sandbox after each task.
+
+Owner activation instructions are in `PROVIDER_SETUP.md`. Credentials remain server-side and the dashboard never renders them.
+
 The email-first Sales engine lives in `services/openoutreach-spiritualai` as a separate GPLv3 service pinned from upstream commit `c1edbbf40240749134c924b52519c8758eed830a`. This fork defaults external sends off, disables remote freemium promotions, encrypts stored provider and mailbox credentials, freezes every opener and follow-up for exact-draft approval, enforces global suppression and prior-contact checks, caps each mailbox at 15 messages per day, and exposes a localhost bearer-authenticated status/approval API to the factory. Its `SPIRITUALAI_SETUP.md` contains the owner activation sequence.
 
 ## User access

@@ -30,6 +30,11 @@ export const ACTION_POLICIES: Readonly<Record<ExternalAction, ActionPolicy>> = {
   "product-release": policy("product-release", "high", "human-approval", ["Quality, safety, rights and legal gates pass"]),
   "credential-or-permission-change": policy("credential-or-permission-change", "critical", "dual-control", ["Least privilege review passes", "Owner or security administrator approves"]),
   "external-account-create": policy("external-account-create", "critical", "dual-control", ["Owner completes identity, terms, CAPTCHA and verification steps", "Platform automation policy permits the intended use", "Least-privilege scopes and recovery ownership are recorded"]),
+  "external-mailbox-read": policy("external-mailbox-read", "medium", "policy-check", ["Mailbox is company-owned", "Untrusted message content is isolated from instructions", "Spam, blocked and unauthenticated mail are excluded"]),
+  "cloud-computer-create": policy("cloud-computer-create", "critical", "human-approval", ["Workspace, size, cost and purpose are approved", "Machine has no unreviewed company secrets"]),
+  "cloud-computer-view": policy("cloud-computer-view", "high", "human-approval", ["Owner approves the specific computer and task", "Screenshot may contain sensitive information"]),
+  "cloud-computer-control": policy("cloud-computer-control", "critical", "human-approval", ["Exact operation and target computer are approved", "External side effects remain separately approval-gated"]),
+  "sandbox-code-execute": policy("sandbox-code-execute", "high", "human-approval", ["Command, timeout and purpose are approved", "No company secrets are injected", "Sandbox is destroyed after the job"]),
   "agent-loop-start": policy("agent-loop-start", "medium", "policy-check", ["Budget, time, rate and action limits are configured", "Loop has a kill switch and idempotency key"]),
   "agent-loop-pause": policy("agent-loop-pause", "low", "autonomous"),
 };

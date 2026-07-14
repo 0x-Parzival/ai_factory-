@@ -11,6 +11,7 @@ export type ConnectorCategory =
   | "ANALYTICS"
   | "CONTENT"
   | "STORAGE"
+  | "COMPUTE"
   | "LEGAL_RESEARCH";
 
 export interface ConnectorDefinition {
@@ -25,6 +26,54 @@ export interface ConnectorDefinition {
 }
 
 export const CONNECTOR_CATALOG: ConnectorDefinition[] = [
+  {
+    id: "agentmail",
+    name: "AgentMail",
+    category: "EMAIL",
+    departments: ["ceo", "sales", "customer-care"],
+    requiredSecrets: ["AGENTMAIL_API_KEY", "AGENTMAIL_INBOX_ID"],
+    optionalSecrets: ["AGENTMAIL_DOMAIN"],
+    actions: ["email.read", "email.inbox.create", "email.send"],
+    notes: "One dedicated, owner-configured agent inbox. Inbox creation and every outbound message are approval-gated; reads exclude spam, blocked, unauthenticated, and trash mail.",
+  },
+  {
+    id: "composio",
+    name: "Composio Managed OAuth",
+    category: "CONTENT",
+    departments: ["ceo", "sales", "customer-care", "marketing", "product-management", "finance", "data-analytics", "seo-geo-aeo"],
+    requiredSecrets: ["COMPOSIO_API_KEY", "COMPOSIO_ACTION_TOOL_ALLOWLIST", "COMPOSIO_TOOLKIT_VERSIONS"],
+    optionalSecrets: ["COMPOSIO_ALLOWED_TOOLKITS"],
+    actions: ["research.read", "analytics.read", "content.draft", "email.read", "email.send", "social.publish", "social.message", "customer.record.update", "payment.create", "payment.refund", "account.connect"],
+    notes: "OAuth accounts are private to the signed-in owner. Tool execution is denied unless the exact tool slug is mapped to the requested factory action and its toolkit version is pinned.",
+  },
+  {
+    id: "orgo",
+    name: "Orgo Cloud Computer",
+    category: "COMPUTE",
+    departments: ["ceo", "product-management"],
+    requiredSecrets: ["ORGO_API_KEY", "ORGO_WORKSPACE_ID"],
+    actions: ["computer.create", "computer.read", "computer.execute"],
+    notes: "Persistent cloud desktops. Creation, screenshots, typing, clicks, shell, Python, and lifecycle actions all require explicit human approval.",
+  },
+  {
+    id: "firecrawl",
+    name: "Firecrawl Web Data",
+    category: "CONTENT",
+    departments: ["ceo", "sales", "marketing", "product-management", "data-analytics", "seo-geo-aeo"],
+    requiredSecrets: ["FIRECRAWL_API_KEY"],
+    actions: ["research.read"],
+    notes: "Public-web search and single-page extraction only. Private, local, credential-bearing, and non-HTTPS targets are rejected; bulk crawling and browser interaction are not exposed.",
+  },
+  {
+    id: "e2b",
+    name: "E2B Ephemeral Sandbox",
+    category: "COMPUTE",
+    departments: ["ceo", "product-management", "data-analytics", "finance"],
+    requiredSecrets: ["E2B_API_KEY"],
+    optionalSecrets: ["E2B_TEMPLATE"],
+    actions: ["code.execute"],
+    notes: "Approval-gated command execution in a new isolated sandbox. Runtime and output are capped, no company secrets are injected, and the sandbox is killed after each job.",
+  },
   {
     id: "openoutreach",
     name: "Spiritual AI OpenOutreach",

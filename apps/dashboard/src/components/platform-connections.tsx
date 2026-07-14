@@ -25,7 +25,7 @@ export function PlatformConnections({ apps, configured, authenticationConfigured
     setLoading(true);
     setError(undefined);
     try {
-      const response = await fetch("/api/integrations/pipedream/accounts", { cache: "no-store", credentials: "same-origin" });
+      const response = await fetch("/api/integrations/composio/accounts", { cache: "no-store", credentials: "same-origin" });
       const payload = await response.json().catch(() => ({})) as { accounts?: ConnectedAccount[]; error?: string };
       if (!response.ok) throw new Error(payload.error || "Could not load connected accounts.");
       setAccounts(payload.accounts || []);
@@ -48,7 +48,7 @@ export function PlatformConnections({ apps, configured, authenticationConfigured
     setConnecting(app);
     setError(undefined);
     try {
-      const response = await fetch("/api/integrations/pipedream/connect-link", {
+      const response = await fetch("/api/integrations/composio/connect-link", {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json" },
@@ -70,7 +70,7 @@ export function PlatformConnections({ apps, configured, authenticationConfigured
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle className="flex items-center gap-2"><PlugZap className="h-5 w-5" />Connect company accounts</CardTitle>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">Secure OAuth through Pipedream MCP. Credentials stay isolated from the browser and AI models; every account is scoped to the signed-in factory owner.</p>
+          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">Secure OAuth through Composio. Credentials stay isolated from the browser and AI models; every account is private and scoped to the signed-in factory owner.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading || !configured || !authenticationConfigured}>
           {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}Refresh
@@ -78,7 +78,7 @@ export function PlatformConnections({ apps, configured, authenticationConfigured
       </CardHeader>
       <CardContent className="space-y-4">
         {!authenticationConfigured && <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground">Configure Clerk login first. Connected accounts are always attached to an authenticated user.</p>}
-        {authenticationConfigured && !configured && <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground">Add the four Pipedream server variables shown below to activate one-click connections.</p>}
+        {authenticationConfigured && !configured && <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground">Add the Composio server key and action-scoped tool mappings shown below to activate one-click connections.</p>}
         {error && <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {apps.map((app) => {

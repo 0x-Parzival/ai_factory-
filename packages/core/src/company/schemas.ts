@@ -12,7 +12,9 @@ export const externalActionSchema = z.enum([
   "contract-or-terms-change", "legal-advice-publish", "personal-data-export",
   "refund-create", "payout-create", "bank-or-payment-settings-change",
   "tax-or-regulatory-filing", "product-release", "credential-or-permission-change",
-  "external-account-create", "agent-loop-start", "agent-loop-pause",
+  "external-account-create", "external-mailbox-read", "cloud-computer-create",
+  "cloud-computer-view", "cloud-computer-control", "sandbox-code-execute",
+  "agent-loop-start", "agent-loop-pause",
 ]);
 
 export const secretReferenceSchema = z.object({
@@ -64,7 +66,7 @@ export const aiProviderConnectorSchema = z.object({
 export const communicationConnectorSchema = z.object({
   ...connectorBaseShape,
   kind: z.enum(["email", "social-media", "telephony", "messaging"]),
-  provider: z.enum(["smtp", "sendgrid", "mailgun", "twilio", "telegram", "whatsapp", "linkedin", "x", "facebook", "instagram", "youtube", "tiktok"]),
+  provider: z.enum(["smtp", "sendgrid", "mailgun", "agentmail", "twilio", "telegram", "whatsapp", "linkedin", "x", "facebook", "instagram", "youtube", "tiktok"]),
   accountId: z.string().min(1).max(250),
   senderIdentity: z.string().min(1).max(250).optional(),
   webhookSigningSecret: secretReferenceSchema.optional(),

@@ -4,9 +4,15 @@ export type BusinessActionKind =
   | "research.read"
   | "analytics.read"
   | "content.draft"
+  | "email.read"
+  | "email.inbox.create"
   | "email.send"
   | "social.publish"
   | "social.message"
+  | "computer.create"
+  | "computer.read"
+  | "computer.execute"
+  | "code.execute"
   | "voice.call"
   | "contract.accept"
   | "payment.create"
@@ -82,10 +88,16 @@ const RISK: Record<BusinessActionKind, BusinessActionRisk> = {
   "research.read": "LOW",
   "analytics.read": "LOW",
   "content.draft": "LOW",
+  "email.read": "MEDIUM",
+  "email.inbox.create": "CRITICAL",
   "customer.record.update": "MEDIUM",
   "email.send": "HIGH",
   "social.publish": "HIGH",
   "social.message": "HIGH",
+  "computer.create": "CRITICAL",
+  "computer.read": "HIGH",
+  "computer.execute": "CRITICAL",
+  "code.execute": "HIGH",
   "voice.call": "HIGH",
   "contract.accept": "CRITICAL",
   "payment.create": "CRITICAL",

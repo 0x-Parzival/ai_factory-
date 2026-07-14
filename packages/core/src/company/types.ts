@@ -108,6 +108,11 @@ export type ExternalAction =
   | "product-release"
   | "credential-or-permission-change"
   | "external-account-create"
+  | "external-mailbox-read"
+  | "cloud-computer-create"
+  | "cloud-computer-view"
+  | "cloud-computer-control"
+  | "sandbox-code-execute"
   | "agent-loop-start"
   | "agent-loop-pause";
 
@@ -166,6 +171,9 @@ export type ConnectorKind =
   | "accounting"
   | "analytics"
   | "content-storage"
+  | "web-data"
+  | "cloud-computer"
+  | "sandbox"
   | "commerce";
 
 export type ConnectorStatus =

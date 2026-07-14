@@ -4,6 +4,11 @@ import { evaluateBusinessAction } from "./actions";
 import { CONNECTOR_CATALOG, connectorReadiness } from "./catalog";
 import { GoogleSearchConsoleConnector } from "./business-connectors";
 import { OpenOutreachConnector } from "./openoutreach";
+import { AgentMailConnector } from "./agentmail";
+import { ComposioConnector } from "./composio";
+import { E2BConnector } from "./e2b";
+import { FirecrawlConnector } from "./firecrawl";
+import { OrgoConnector } from "./orgo";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -228,5 +233,102 @@ describe("OpenOutreach connector", () => {
       requestedBy: "owner",
       requestedAt: new Date(),
     }, "recipient-scoped-owner-approval")).rejects.toThrow("does not match");
+  });
+});
+
+describe("agent infrastructure connectors", () => {
+  const base = {
+    organizationId: "spiritual-ai",
+    taskId: "task-provider-1",
+    idempotencyKey: "spiritual-ai:task-provider-1:action-1",
+    requestedBy: "ceo-agent",
+    requestedAt: new Date("2026-07-15T00:00:00.000Z"),
+  };
+
+  it("sends AgentMail only when the exact recipient and body are approved", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ message_id: "msg_1", thread_id: "thr_1" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const connector = new AgentMailConnector({ apiKey: "am_test", inboxId: "inbox_1" });
+    const outreach = {
+      channel: "email",
+      recipientId: "customer@example.com",
+      message: "I’m Spiritual AI’s assistant. Here is the information you requested.",
+      relationshipBasis: "inbound" as const,
+      suppressionCheckedAt: "2026-07-15T00:00:00.000Z",
+      suppressed: false,
+      platformPolicyConfirmed: true,
+      aiDisclosure: true,
+    };
+    const action = {
+      ...base, id: "agentmail-send-1", departmentId: "customer-care", kind: "email.send" as const,
+      payload: { operation: "send" as const, recipient: outreach.recipientId, subject: "Your Spiritual AI request", text: outreach.message, outreach },
+    };
+    await expect(connector.execute(action)).rejects.toThrow("Human approval");
+    await expect(connector.execute(action, "owner-approval")).resolves.toMatchObject({ message_id: "msg_1" });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/inboxes/inbox_1/messages/send");
+    expect(JSON.parse(String(init.body))).toMatchObject({ to: "customer@example.com", text: outreach.message });
+  });
+
+  it("keeps Firecrawl on public HTTPS targets", async () => {
+    const connector = new FirecrawlConnector("fc_test");
+    await expect(connector.execute({
+      ...base, id: "firecrawl-private", departmentId: "seo-geo-aeo", kind: "research.read",
+      payload: { operation: "scrape", url: "http://127.0.0.1/admin" },
+    })).rejects.toThrow("public HTTPS");
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true, data: { markdown: "Public page" } }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await connector.execute({
+      ...base, id: "firecrawl-public", departmentId: "seo-geo-aeo", kind: "research.read",
+      payload: { operation: "scrape", url: "https://spiritualai.store/about" },
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("executes only action-mapped, version-pinned Composio tools", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ successful: true, data: { items: [] } }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const connector = new ComposioConnector({
+      apiKey: "cmp_test", allowedToolkits: ["reddit"],
+      actionToolAllowlist: { "research.read": ["REDDIT_GET_SUBREDDIT_POSTS"] },
+      toolkitVersions: { reddit: "20260701_00" },
+    });
+    await expect(connector.execute({
+      ...base, id: "composio-block", departmentId: "marketing", kind: "research.read",
+      payload: { toolkit: "reddit", toolSlug: "REDDIT_CREATE_REDDIT_POST", userId: "spiritual-ai:user_1", arguments: {} },
+    })).rejects.toThrow("not mapped");
+    await connector.execute({
+      ...base, id: "composio-read", departmentId: "marketing", kind: "research.read",
+      payload: { toolkit: "reddit", toolSlug: "REDDIT_GET_SUBREDDIT_POSTS", userId: "spiritual-ai:user_1", arguments: { subreddit: "meditation" } },
+    });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toMatchObject({ version: "20260701_00", user_id: "spiritual-ai:user_1" });
+  });
+
+  it("requires approval before controlling an Orgo computer", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const connector = new OrgoConnector({ apiKey: "sk_live_test", workspaceId: "550e8400-e29b-41d4-a716-446655440000" });
+    const action = {
+      ...base, id: "orgo-click", departmentId: "ceo", kind: "computer.execute" as const,
+      payload: { operation: "click" as const, computerId: "a3bb189e-8bf9-4888-9912-ace4e6543002", x: 100, y: 200 },
+    };
+    await expect(connector.execute(action)).rejects.toThrow("Human approval");
+    await expect(connector.execute(action, "owner-approval")).resolves.toMatchObject({ success: true });
+  });
+
+  it("kills the E2B sandbox after each approved command", async () => {
+    const kill = vi.fn().mockResolvedValue(undefined);
+    const connector = new E2BConnector({ apiKey: "e2b_test" }, async () => ({
+      sandboxId: "sbx_1", kill,
+      commands: { run: vi.fn().mockResolvedValue({ stdout: "done\n", stderr: "", exitCode: 0 }) },
+    }));
+    const action = {
+      ...base, id: "e2b-command", departmentId: "product-management", kind: "code.execute" as const,
+      payload: { command: "npm test", timeoutMs: 30_000 },
+    };
+    await expect(connector.execute(action)).rejects.toThrow("Human approval");
+    await expect(connector.execute(action, "owner-approval")).resolves.toMatchObject({ sandboxId: "sbx_1", ephemeral: true, exitCode: 0 });
+    expect(kill).toHaveBeenCalledOnce();
   });
 });

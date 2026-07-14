@@ -1,22 +1,24 @@
 import { Cable, CheckCircle2, KeyRound, LockKeyhole, Search, Unplug } from "lucide-react";
 
+import { agentInfrastructureFromEnv } from "@ai-factory/integrations/agent-infrastructure";
 import { CONNECTOR_CATALOG, connectorReadiness } from "@ai-factory/integrations/catalog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlatformConnections } from "@/components/platform-connections";
 import { isClerkConfigured } from "@/lib/auth-config";
-import { isPipedreamConfigured, PIPEDREAM_APPS } from "@/lib/pipedream";
+import { COMPOSIO_TOOLKITS, isComposioConfigured } from "@/lib/composio";
 
 export const dynamic = "force-dynamic";
 
-export default function ConnectorsPage() {
+export default async function ConnectorsPage() {
   const connectors = CONNECTOR_CATALOG.map((definition) => ({
     definition,
     readiness: connectorReadiness(definition),
   }));
   const configured = connectors.filter((connector) => connector.readiness.configured).length;
   const authConfigured = isClerkConfigured();
-  const pipedreamConfigured = isPipedreamConfigured();
+  const composioConfigured = isComposioConfigured();
+  const infrastructureHealth = await agentInfrastructureFromEnv().health();
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -27,8 +29,8 @@ export default function ConnectorsPage() {
       </div>
 
       <PlatformConnections
-        apps={PIPEDREAM_APPS.map((app) => ({ ...app }))}
-        configured={pipedreamConfigured}
+        apps={COMPOSIO_TOOLKITS.map((app) => ({ ...app }))}
+        configured={composioConfigured}
         authenticationConfigured={authConfigured}
       />
 
@@ -47,18 +49,34 @@ export default function ConnectorsPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Pipedream MCP gateway setup</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg">Composio managed OAuth setup</CardTitle></CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <div className="rounded-lg bg-muted/40 p-3">
             <p className="text-xs font-medium text-muted-foreground">Required server variables</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {["PIPEDREAM_CLIENT_ID", "PIPEDREAM_CLIENT_SECRET", "PIPEDREAM_PROJECT_ID", "PIPEDREAM_ENVIRONMENT"].map((secret) => <code key={secret} className="rounded bg-background px-2 py-1 text-[11px]">{secret}</code>)}
+              {["COMPOSIO_API_KEY", "COMPOSIO_ACTION_TOOL_ALLOWLIST", "COMPOSIO_TOOLKIT_VERSIONS"].map((secret) => <code key={secret} className="rounded bg-background px-2 py-1 text-[11px]">{secret}</code>)}
             </div>
           </div>
           <div className="rounded-lg border p-3">
-            <p className="text-sm font-medium">{pipedreamConfigured ? "Gateway configured" : "Gateway not configured"}</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">Uses hosted OAuth and MCP for account connections. Tool execution still passes through department permissions, budgets, audit records, and human approval gates.</p>
+            <p className="text-sm font-medium">{composioConfigured ? "Gateway configured" : "Gateway not configured"}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Uses hosted OAuth with private per-owner accounts. Exact tool slugs and dated toolkit versions must be configured before execution; external writes still pass through approval gates.</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-emerald-500/30 bg-emerald-500/5">
+        <CardHeader><CardTitle className="text-lg">Agent capability stack</CardTitle></CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {[
+            ["agentmail", "AgentMail", "Dedicated agent inbox", "Read filtered inbox; approve every send"],
+            ["composio", "Composio", "Connected platforms", "Private OAuth plus exact tool allowlists"],
+            ["orgo", "Orgo", "Persistent cloud PC", "Approve every view and control operation"],
+            ["firecrawl", "Firecrawl", "Public web data", "Search and single-page extraction only"],
+            ["e2b", "E2B", "Ephemeral execution", "Approve, cap, execute, then destroy"],
+          ].map(([id, name, purpose, boundary]) => {
+            const status = infrastructureHealth[id as keyof typeof infrastructureHealth];
+            return <div key={id} className="rounded-lg border bg-background/70 p-3"><div className="flex items-center justify-between gap-2"><p className="text-sm font-medium">{name}</p><Badge variant={status.reachable ? "success" : "secondary"}>{status.reachable ? "Reachable" : status.configured ? "Configured" : "Setup required"}</Badge></div><p className="mt-1 text-xs text-muted-foreground">{purpose}</p><p className="mt-2 text-[11px] leading-4 text-muted-foreground">{boundary}</p></div>;
+          })}
         </CardContent>
       </Card>
 
