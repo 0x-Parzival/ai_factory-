@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  clerkId       String    @unique
+  email         String    @unique
+  name          String?
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  agents        Agent[]
+  workflows     Workflow[]
+  deployments   Deployment[]
+  orgMemberships OrgMember[]
+  conversations Conversation[]
+  personas      Persona[]
+
+  @@map("users")
+}
+
+// ─── Organization & Teams ────────────────────────────
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     OrgMember[]
+  agents      Agent[]
+  workflows   Workflow[]
+  deployments Deployment[]
+
+  @@map("organizations")
+}
+
+model OrgMember {
+  id             String   @id @default(cuid())
+  userId         String
+  orgId          String
+  role           Role     @default(MEMBER)
+  joinedAt       DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@map("org_members")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ─── Persona / Agent ─────────────────────────────────
+
+model Persona {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  category       PersonaCategory
+  subcategory    String?
+  description    String   @db.Text
+  personality    String?  @db.Text
+  systemPrompt   String   @db.Text
+  model          String   @default("claude-sonnet-4-20250514")
+  temperature    Float    @default(0.7)
+  maxTokens      Int      @default(4096)
+  tools          Json     @default("[]")
+  avatarUrl      String?
+  isPublic       Boolean  @default(true)
+  isActive       Boolean  @default(true)
+  deployCount    Int      @default(0)
+  rating         Float    @default(0)
+  ratingCount    Int      @default(0)
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  creator        User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  agents         Agent[]
+  marketplaceListing MarketplaceListing?
+
+  @@index([category])
+  @@index([isActive])
+  @@index([rating])
+  @@map("personas")
+}
+
+enum PersonaCategory {
+  ENGINEERING
+  DESIGN
+  MARKETING
+  SALES
+  PRODUCT
+  STRATEGY
+  SUPPORT
+  TESTING
+  DATA
+  GAME_DEVELOPMENT
+  ACADEMIC
+  INFRASTRUCTURE
+  SPECIALIZED
+}
+
+// ─── Agent Instance (deployed persona) ───────────────
+
+model Agent {
+  id             String   @id @default(cuid())
+  personaId      String
+  orgId          String
+  name           String
+  channel        Channel
+  channelConfig  Json     @default("{}")
+  isActive       Boolean  @default(true)
+  status         AgentStatus @default(OFFLINE)
+  messageCount   Int      @default(0)
+  lastActiveAt   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  persona        Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  creator        User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  createdBy      String?
+  conversations  Conversation[]
+  deployments    Deployment[]
+
+  @@index([orgId])
+  @@index([personaId])
+  @@index([status])
+  @@map("agents")
+}
+
+enum Channel {
+  TELEGRAM
+  DISCORD
+  WHATSAPP
+  SLACK
+  WEBCHAT
+  SIGNAL
+}
+
+enum AgentStatus {
+  ONLINE
+  OFFLINE
+  BUSY
+  ERROR
+}
+
+// ─── Conversation & Messages ─────────────────────────
+
+model Conversation {
+  id             String   @id @default(cuid())
+  agentId        String
+  userId         String?
+  channel        Channel
+  channelUserId  String?
+  title          String?
+  summary        String?  @db.Text
+  messageCount   Int      @default(0)
+  status         ConversationStatus @default(ACTIVE)
+  lastMessageAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  agent          Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages       Message[]
+
+  @@index([agentId])
+  @@index([userId])
+  @@index([status])
+  @@map("conversations")
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  content        String   @db.Text
+  toolCalls      Json?
+  tokens         Int?
+  model          String?
+  createdAt      DateTime @default(now())
+
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+// ─── Workflow ─────────────────────────────────────────
+
+model Workflow {
+  id             String   @id @default(cuid())
+  orgId          String
+  name           String
+  description    String?  @db.Text
+  steps          Json     @default("[]")
+  isActive       Boolean  @default(true)
+  runCount       Int      @default(0)
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  creator        User?    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  runs           WorkflowRun[]
+
+  @@index([orgId])
+  @@map("workflows")
+}
+
+model WorkflowRun {
+  id             String   @id @default(cuid())
+  workflowId     String
+  status         WorkflowRunStatus @default(PENDING)
+  currentStep    Int      @default(0)
+  input          Json?
+  output         Json?
+  steps          Json     @default("[]")
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+
+  // Relations
+  workflow       Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([status])
+  @@map("workflow_runs")
+}
+
+enum WorkflowRunStatus {
+  PENDING
+  RUNNING
+  NEEDS_APPROVAL
+  APPROVED
+  REJECTED
+  COMPLETED
+  FAILED
+}
+
+// ─── Deployment (audit trail) ────────────────────────
+
+model Deployment {
+  id             String   @id @default(cuid())
+  agentId        String
+  orgId          String
+  deployedBy     String?
+  channel        Channel
+  status         DeploymentStatus @default(PENDING)
+  config         Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  agent          Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  org            Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user           User?    @relation(fields: [deployedBy], references: [id], onDelete: SetNull)
+
+  @@index([agentId])
+  @@index([orgId])
+  @@map("deployments")
+}
+
+enum DeploymentStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  FAILED
+  REMOVED
+}
+
+// ─── Marketplace ─────────────────────────────────────
+
+model MarketplaceListing {
+  id             String   @id @default(cuid())
+  personaId      String   @unique
+  featured       Boolean  @default(false)
+  price          Float    @default(0)
+  installs       Int      @default(0)
+  revenue        Float    @default(0)
+  tags          String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  persona        Persona  @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([featured])
+  @@index([installs])
+  @@map("marketplace_listings")
+}

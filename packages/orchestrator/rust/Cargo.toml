@@ -1,0 +1,70 @@
+[package]
+name = "ironclaw-orchestrator"
+version = "1.0.0"
+edition = "2021"
+description = "IronClaw AI Orchestrator - High-performance task assignment and workflow orchestration"
+license = "MIT"
+authors = ["AI Factory Team"]
+repository = "https://github.com/parzival/ai-factory"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.38", features = ["full", "tracing"] }
+async-trait = "0.1.75"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Configuration
+config = "0.14"
+toml = "0.8"
+
+# Logging & tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-appender = "0.6"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "offline"] }
+uuid = { version = "1.8", features = ["serde", "v4", "v7"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# Message queue
+lapin = "2.11"
+deadpool-lapin = "0.6"
+
+# Redis
+redis = { version = "0.24", features = ["tokio-comp", "connection-manager"] }
+
+# ACP (Agent Client Protocol)
+acpx = { path = "../../../acpx" }  # Local path to acpx crate
+
+# Utilities
+anyhow = "1.0"
+thiserror = "1.0"
+parking_lot = "0.12"
+dashmap = "6.1"
+once_cell = "1.19"
+ulid = "1.3"
+
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockall = "0.12"
+proptest = "1.4"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[workspace]
+members = ["orchestrator", "acp", "skills", "memory"]

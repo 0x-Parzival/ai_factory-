@@ -1,0 +1,31 @@
+{
+  "name": "@ai-factory/orchestrator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc && cd rust && cargo build --release",
+    "dev": "tsc --watch & cd rust && cargo watch -x run",
+    "test": "vitest run",
+    "test:unit": "vitest run --reporter=verbose",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "rust:build": "cd rust && cargo build --release",
+    "rust:test": "cd rust && cargo test",
+    "clean": "rm -rf dist .turbo rust/target"
+  },
+  "dependencies": {
+    "@ai-factory/core": "workspace:*",
+    "zod": "^3.23.0",
+    "ioredis": "^5.4.0",
+    "bullmq": "^5.0.0",
+    "acpx": "^0.12.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
