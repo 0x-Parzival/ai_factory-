@@ -11,11 +11,14 @@ export type DepartmentId =
   | "sales"
   | "customer-care"
   | "marketing"
+  | "influencer-partnerships"
   | "product-management"
+  | "backend-engineering"
   | "legal"
   | "finance"
   | "data-science-analytics"
-  | "seo-geo-aeo";
+  | "seo-geo-aeo"
+  | "market-research";
 
 export type DepartmentCapability =
   | "company.strategy.read"
@@ -49,6 +52,16 @@ export type DepartmentCapability =
   | "marketing.community.respond"
   | "marketing.campaigns.manage"
   | "marketing.ads.manage"
+  | "influencers.creators.research"
+  | "influencers.fit.score"
+  | "influencers.crm.read"
+  | "influencers.crm.write"
+  | "influencers.outreach.draft"
+  | "influencers.outreach.send"
+  | "influencers.referrals.read"
+  | "influencers.referrals.manage"
+  | "influencers.earnings.reconcile"
+  | "influencers.payouts.request"
   | "product.orders.read"
   | "product.research.perform"
   | "product.requirements.write"
@@ -56,6 +69,13 @@ export type DepartmentCapability =
   | "product.personas.configure"
   | "product.quality.verify"
   | "product.delivery.release"
+  | "backend.database.read"
+  | "backend.schema.inspect"
+  | "backend.data.quality.analyze"
+  | "backend.data.extract.aggregate"
+  | "backend.application.diagnose"
+  | "backend.migrations.propose"
+  | "backend.infrastructure.change"
   | "legal.law.research"
   | "legal.compliance.review"
   | "legal.contracts.review"
@@ -85,7 +105,9 @@ export type DepartmentCapability =
   | "search.structured-data.draft"
   | "search.geo.optimize"
   | "search.aeo.optimize"
-  | "search.content.publish";
+  | "search.content.publish"
+  | "research.sources.search"
+  | "research.insights.synthesize";
 
 export type ExternalAction =
   | "internal-read"
@@ -170,6 +192,7 @@ export type ConnectorKind =
   | "payment"
   | "accounting"
   | "analytics"
+  | "database"
   | "content-storage"
   | "web-data"
   | "cloud-computer"

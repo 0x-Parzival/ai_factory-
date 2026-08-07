@@ -4,25 +4,27 @@ import {
   ArrowLeft,
   Bot,
   BrainCircuit,
-  CircleDollarSign,
-  Clock3,
-  DatabaseZap,
   ListChecks,
-  Power,
-  ShieldAlert,
   Unplug,
-  Workflow,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DepartmentChat } from "@/components/department-chat";
+import { BackendEngineeringConsole } from "@/components/backend-engineering-console";
 import { SalesChannelMatrix } from "@/components/sales-channel-matrix";
+import { LeadGenerationConsole } from "@/components/lead-generation-console";
 import { isClerkConfigured } from "@/lib/auth-config";
 import { DEPARTMENTS, getDepartment, MODEL_PROVIDERS } from "@/lib/factory-blueprints";
 import { getProviderRuntimeStatus, getWorkerRuntimeStatus } from "@/lib/factory-runtime";
 import { getOpenOutreachStatus } from "@/lib/openoutreach";
+import { SecurityOperationsConsole } from "@/components/security-operations-console";
+import { AnalyticsWorkspace } from "@/components/analytics-workspace";
+import { MailOperationsConsole } from "@/components/mail-operations-console";
+import { isPipedreamConfigured } from "@/lib/pipedream";
+import { OpenSeoConsole } from "@/components/open-seo-console";
+import { MarketResearchWorkspace } from "@/components/market-research-workspace";
 
 export function generateStaticParams() {
   return DEPARTMENTS.map((department) => ({ slug: department.slug }));
@@ -53,15 +55,79 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
     "ceo-orchestrator": "ceo",
     "customer-care": "customer_care",
     "product-management": "product",
+    "backend-engineering": "backend_engineering",
     "legal-compliance": "legal",
     "data-analytics": "data_analytics",
     "seo-geo-aeo": "seo_geo_aeo",
+    "cyber-security": "cyber_security",
   } as Record<string, string>)[department.slug] || department.slug;
   const departmentAgent = workerStatus?.agents?.find((agent) => agent.departmentId === runtimeId);
   const authenticationConfigured = isClerkConfigured();
   const agentDeployed = Boolean(departmentAgent);
   const agentWorking = departmentAgent?.status === "running";
   const agentQueued = departmentAgent?.status === "queued";
+
+  if (department.slug === "sales") {
+    return (
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge variant="outline">Sales workspace</Badge>
+              <Badge variant={chatProviders.length ? "success" : "secondary"}>{chatProviders.length ? `${chatProviders.length} AI provider${chatProviders.length === 1 ? "" : "s"} ready` : "Connect an AI provider"}</Badge>
+              {outreachStatus && <Badge variant={outreachStatus.reachable ? "success" : "secondary"}>{outreachStatus.reachable ? "Outreach service online" : outreachStatus.configured ? "Outreach service offline" : "Outreach setup required"}</Badge>}
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Sales</h1>
+            <p className="mt-2 max-w-3xl text-muted-foreground">Use the AI to research and draft. External sending stays approval-controlled until the outreach service, sender identity, and consent checks are ready.</p>
+          </div>
+          <Button asChild variant="outline"><Link href="/dashboard/connectors">Configure sales services</Link></Button>
+        </div>
+        <LeadGenerationConsole providers={chatProviders} authenticationConfigured={authenticationConfigured} />
+        <DepartmentChat departmentSlug={department.slug} departmentName={department.name} providers={chatProviders} authenticationConfigured={authenticationConfigured} />
+        {outreachStatus && <SalesChannelMatrix outreach={outreachStatus} />}
+      </div>
+    );
+  }
+
+  if (department.slug === "backend-engineering") {
+    return <BackendEngineeringConsole providers={chatProviders} authenticationConfigured={authenticationConfigured} />;
+  }
+  if (department.slug === "cyber-security") {
+    return <SecurityOperationsConsole providers={chatProviders} authenticationConfigured={authenticationConfigured} />;
+  }
+  if (department.slug === "data-analytics") {
+    return (
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <AnalyticsWorkspace authenticationConfigured={authenticationConfigured} gatewayConfigured={isPipedreamConfigured()} />
+        <DepartmentChat
+          departmentSlug={department.slug}
+          departmentName="AI Data Analyst"
+          providers={chatProviders}
+          authenticationConfigured={authenticationConfigured}
+        />
+      </div>
+    );
+  }
+  if (department.slug === "mail") {
+    return <MailOperationsConsole authenticationConfigured={authenticationConfigured} />;
+  }
+  if (department.slug === "seo-geo-aeo") {
+    return (
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <div>
+          <Button asChild variant="ghost" size="sm" className="-ml-3 mb-3"><Link href="/dashboard/departments"><ArrowLeft className="mr-2 h-4 w-4" />All departments</Link></Button>
+          <Badge variant="outline">SEO, GEO & AEO</Badge>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight">Search growth</h1>
+          <p className="mt-2 max-w-3xl text-muted-foreground">Use OpenSEO evidence with Codex to research opportunities and prepare changes for approval.</p>
+        </div>
+        <OpenSeoConsole />
+        <DepartmentChat departmentSlug={department.slug} departmentName={department.name} providers={chatProviders} authenticationConfigured={authenticationConfigured} />
+      </div>
+    );
+  }
+  if (department.slug === "market-research") {
+    return <MarketResearchWorkspace providers={chatProviders} authenticationConfigured={authenticationConfigured} />;
+  }
 
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
@@ -78,20 +144,14 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
             <h1 className="text-3xl font-bold tracking-tight">{department.name}</h1>
             <p className="mt-2 max-w-3xl text-muted-foreground">{department.purpose}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline"><Link href="/dashboard/providers"><BrainCircuit className="mr-2 h-4 w-4" />Choose provider</Link></Button>
-            <Button asChild><Link href="/dashboard/settings"><Power className="mr-2 h-4 w-4" />Configure deployment</Link></Button>
-          </div>
+          <Button asChild variant="outline"><Link href="/dashboard/providers"><BrainCircuit className="mr-2 h-4 w-4" />Choose provider</Link></Button>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2">
         {[
           { label: "Agents", value: agentDeployed ? "1" : "0", note: departmentAgent ? `${departmentAgent.provider} · ${departmentAgent.model}` : "None deployed", icon: Bot },
           { label: "Active tasks", value: agentWorking ? "1" : "0", note: agentWorking ? "Working now" : agentQueued ? "1 task queued" : "Queue clear", icon: ListChecks },
-          { label: "Active loops", value: agentDeployed ? "1" : "0", note: agentDeployed ? "Recurring review active" : "Scheduler unset", icon: Workflow },
-          { label: "Pending approvals", value: "0", note: "External actions disabled", icon: ShieldAlert },
-          { label: "Budget", value: "Not set", note: "$0 recorded", icon: CircleDollarSign },
         ].map((metric) => (
           <Card key={metric.label}>
             <CardContent className="pt-6">
@@ -109,75 +169,6 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
         providers={chatProviders}
         authenticationConfigured={authenticationConfigured}
       />
-
-      {department.slug === "sales" && outreachStatus && <SalesChannelMatrix outreach={outreachStatus} />}
-
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Power className="h-5 w-5" />Defined powers</CardTitle>
-            <p className="text-sm text-muted-foreground">Intended authority after systems, policies, credentials, and approvals are configured.</p>
-          </CardHeader>
-          <CardContent>
-            <ol className="space-y-3">
-              {department.powers.map((power, index) => (
-                <li key={power} className="flex gap-3 rounded-lg border p-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{index + 1}</span>
-                  <span className="text-sm leading-6">{power}</span>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><DatabaseZap className="h-5 w-5" />Required systems</CardTitle>
-            <p className="text-sm text-muted-foreground">Connection requirements, not detected integrations.</p>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {department.requiredSystems.map((system) => (
-              <div key={system} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5">
-                <span className="text-sm font-medium">{system}</span>
-                <Badge variant="secondary" className="font-normal text-muted-foreground"><Unplug className="mr-1 h-3 w-3" />Not connected</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Workflow className="h-5 w-5" />Autonomous loop designs</CardTitle>
-            <p className="text-sm text-muted-foreground">{agentDeployed ? "Recurring internal reviews run with limits, idempotency, retries, and stop controls." : "Blueprints remain inactive until triggers, limits, stop conditions, and runtime are configured."}</p>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {department.loopBlueprints.map((loop) => (
-              <div key={loop} className="flex items-center justify-between gap-3 rounded-lg border p-3">
-                <div className="flex items-center gap-3"><Clock3 className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-medium">{loop}</span></div>
-                {agentDeployed ? <Badge variant="success">Active</Badge> : <Badge variant="outline" className="font-normal text-muted-foreground">Inactive</Badge>}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><ShieldAlert className="h-5 w-5" />Mandatory approval boundaries</CardTitle>
-            <p className="text-sm text-muted-foreground">The runtime enforces these gates before high-risk actions; external actions are disabled in the local worker.</p>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {department.approvalBoundaries.map((boundary) => (
-              <div key={boundary} className="flex items-start gap-3 rounded-lg border p-3">
-                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                <span className="text-sm leading-5">{boundary}</span>
-              </div>
-            ))}
-            <Button asChild variant="outline" className="mt-2 w-full"><Link href="/dashboard/governance">Configure governance</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-3">

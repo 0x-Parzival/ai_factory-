@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const departmentIdSchema = z.enum([
-  "ceo", "sales", "customer-care", "marketing", "product-management",
-  "legal", "finance", "data-science-analytics", "seo-geo-aeo",
+  "ceo", "sales", "customer-care", "marketing", "influencer-partnerships", "product-management", "backend-engineering",
+  "legal", "finance", "data-science-analytics", "seo-geo-aeo", "market-research",
 ]);
 
 export const externalActionSchema = z.enum([

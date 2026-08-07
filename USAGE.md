@@ -19,7 +19,11 @@ cd /home/parzival/ai-factory/packages/local-worker
 npm run start
 ```
 
-This launches nine internal-only department agents and nine recurring operating-review loops, including SEO/GEO/AEO. The default model is `qwen2.5:0.5b`; override it with `OLLAMA_MODEL`. The worker deliberately cannot perform outreach, publish content, move money, or use business accounts.
+This launches eleven internal-only department agents and recurring operating-review loops, including Cyber Security & Site Reliability. The default model is `qwen2.5:0.5b`; override it with `OLLAMA_MODEL`. The worker deliberately cannot perform outreach, publish content, move money, run security scans, alter infrastructure, or use business accounts.
+
+## Keep the security watch live
+
+Set `SECURITY_MONITOR_URL` to the single approved HTTPS site. The Security department dashboard refreshes safe health checks every 30 seconds while it is open. For 24/7 agentic reviews, keep the local worker running under your service manager; its security loop produces internal, read-only posture briefs. Configure a separate authenticated owner-alert connector before treating an alert as a pager—this repository intentionally does not send unauthenticated notifications.
 
 ## Configure the runtime
 
@@ -37,6 +41,12 @@ DATABASE_URL='postgresql://...' npx prisma generate --schema packages/core/prism
 6. To enable one-click company account connections, create a Pipedream project and OAuth client, then set `PIPEDREAM_CLIENT_ID`, `PIPEDREAM_CLIENT_SECRET`, `PIPEDREAM_PROJECT_ID`, and `PIPEDREAM_ENVIRONMENT`. Each signed-in Clerk user receives isolated OAuth connections.
 7. Activate departments in read-only or draft-only mode before permitting external actions.
 
+### Activate lifecycle mail
+
+Set `RESEND_API_KEY` and a verified `MAIL_FROM_ADDRESS`, then open **Mail** in the dashboard. It reads the connected Neon database for reports, trials, purchases, delivery links, and expired subscriptions; it creates a deduplicated lifecycle queue and records every send in encrypted local history. Use the authenticated inbound endpoint (`POST /api/mail/inbound`) with `Authorization: Bearer $MAIL_INBOUND_WEBHOOK_SECRET` to log incoming replies.
+
+For automatic transactional sends, have your trusted scheduler call `POST /api/mail/run` with `Authorization: Bearer $MAIL_AUTOMATION_SECRET`. The route processes eligible verified lifecycle events and never sends when its mail-provider configuration is absent. Review the queue and history in the Mail department after activation.
+
 When Clerk keys are absent, localhost stays in an explicit configuration-only mode so the installation can be completed. In that mode, all AI/model APIs return `503` and cannot be used anonymously. When keys are present, Clerk middleware protects every dashboard and API route, and model routes also verify the authenticated user at the handler.
 
 The database seed commands intentionally insert no users, organizations, agents, activity, or metrics. Tenant records must be created through an authenticated onboarding flow.
@@ -46,7 +56,7 @@ The database seed commands intentionally insert no users, organizations, agents,
 - `packages/core`: departments, capabilities, provider/connector contracts, policy evaluation, Prisma schema, and validation.
 - `packages/integrations`: model gateway, local ChatGPT-through-Codex adapter, Pipedream remote MCP gateway, plus approval-gated Razorpay, Microsoft Clarity, and read-only Google Search Console adapters.
 - `packages/orchestrator`: CEO prioritization, queues, recurring loops, approval gates, budgets, retries, dead letters, audit events, stop controls, and Telegram escalation contract.
-- `packages/local-worker`: nine live local department agents with safe internal-only Ollama loops and truthful dashboard status.
+- `packages/local-worker`: ten live local department agents with safe internal-only Ollama loops and truthful dashboard status.
 - `apps/dashboard`: CEO control plane, departments, providers, budgets, governance, workflows, and honest live/empty states.
 
 See [SPIRITUAL_AI_FACTORY.md](./SPIRITUAL_AI_FACTORY.md) for the operating architecture and activation order.

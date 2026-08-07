@@ -10,8 +10,8 @@ import {
 
 describe("Spiritual AI company domain", () => {
   it("defines each required department exactly once", () => {
-    expect(SPIRITUAL_AI_DEPARTMENTS).toHaveLength(9);
-    expect(new Set(SPIRITUAL_AI_DEPARTMENTS.map(({ id }) => id)).size).toBe(9);
+    expect(SPIRITUAL_AI_DEPARTMENTS).toHaveLength(12);
+    expect(new Set(SPIRITUAL_AI_DEPARTMENTS.map(({ id }) => id)).size).toBe(12);
     expect(SPIRITUAL_AI_DEPARTMENTS.every(({ allowedConnectorKinds }) =>
       allowedConnectorKinds.includes("ai-provider"),
     )).toBe(true);

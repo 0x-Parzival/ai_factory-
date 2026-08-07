@@ -60,7 +60,7 @@ export const PERSONA_TO_DEPARTMENT_MAP: Record<string, string> = {
   HR: "ceo",
   LEGAL: "legal",
   SECURITY: "legal",
-  RESEARCH: "data-science-analytics",
+  RESEARCH: "market-research",
 };
 
 /** Provider metadata contains no stale model names or prices. */

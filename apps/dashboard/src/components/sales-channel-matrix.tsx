@@ -1,27 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, MessageCircleMore, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SALES_CHANNELS, SALES_OUTREACH_GATES, type SalesChannelMode } from "@/lib/sales-channels";
 import type { OpenOutreachStatus } from "@/lib/openoutreach";
-
-const MODE_LABEL: Record<SalesChannelMode, string> = {
-  inbound: "Inbound first",
-  "opt-in": "Opt-in required",
-  restricted: "Restricted access",
-  internal: "Workspace only",
-  unsupported: "No sales DM API",
-};
-
-const MODE_VARIANT: Record<SalesChannelMode, "success" | "secondary" | "outline"> = {
-  inbound: "success",
-  "opt-in": "success",
-  restricted: "secondary",
-  internal: "outline",
-  unsupported: "outline",
-};
 
 export function SalesChannelMatrix({ outreach }: { outreach: OpenOutreachStatus }) {
   return (
@@ -47,38 +30,6 @@ export function SalesChannelMatrix({ outreach }: { outreach: OpenOutreachStatus 
             <p className="text-sm">External sending: <span className="font-semibold">{outreach.externalSendsEnabled ? "enabled" : "off"}</span> · Sender identity: <span className="font-semibold">{outreach.senderIdentityComplete ? "complete" : "incomplete"}</span></p>
             <Button asChild size="sm" variant="outline"><Link href="/dashboard/connectors">Open activation checklist<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
-        </CardContent>
-      </Card>
-      <Card className="border-emerald-500/30 bg-emerald-500/5">
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle className="flex items-center gap-2"><MessageCircleMore className="h-5 w-5" />Sales conversation channels</CardTitle>
-            <p className="mt-1 max-w-4xl text-sm text-muted-foreground">Capability and consent map for finding the right people for Spiritual AI. Connection support does not by itself authorize a message.</p>
-          </div>
-          <Button asChild size="sm"><Link href="/dashboard/connectors">Connect accounts<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {SALES_CHANNELS.map((channel) => (
-              <div key={channel.id} className="rounded-lg border bg-background/70 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-medium">{channel.name}</p>
-                  <Badge variant={MODE_VARIANT[channel.mode]} className="shrink-0">{MODE_LABEL[channel.mode]}</Badge>
-                </div>
-                <p className="mt-2 text-xs font-medium text-muted-foreground">{channel.salesUse}</p>
-                <p className="mt-3 text-xs leading-5">{channel.permittedUse}</p>
-                <p className="mt-3 rounded-md bg-muted/50 p-2 text-[11px] leading-4 text-muted-foreground"><span className="font-semibold text-foreground">First contact:</span> {channel.firstContactRule}</p>
-                <p className="mt-2 text-[11px] text-muted-foreground">{channel.connection}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><ShieldCheck className="h-5 w-5" />Required before Sales sends</CardTitle></CardHeader>
-        <CardContent className="grid gap-2 md:grid-cols-2">
-          {SALES_OUTREACH_GATES.map((gate) => <div key={gate} className="flex gap-2 rounded-lg border p-3 text-sm leading-5"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{gate}</div>)}
         </CardContent>
       </Card>
     </div>

@@ -22,6 +22,12 @@ export const PIPEDREAM_APPS = [
   { slug: "hubspot", name: "HubSpot", purpose: "Lead and customer relationship management", risk: "Outbound actions require approval" },
   { slug: "stripe", name: "Stripe", purpose: "Revenue and customer payment visibility", risk: "Money movement requires approval" },
   { slug: "razorpay", name: "Razorpay", purpose: "spiritualai.store payment operations", risk: "Refunds and payouts require approval" },
+  { slug: "paypal", name: "PayPal", purpose: "Revenue and customer payment visibility", risk: "Money movement requires approval" },
+  { slug: "coinbase_commerce", name: "Coinbase Commerce", purpose: "Crypto payment visibility", risk: "Payouts and refunds require approval" },
+  { slug: "posthog", name: "PostHog", purpose: "Read product analytics, events, funnels, and retention", risk: "Read-only analytics access" },
+  { slug: "google_analytics", name: "Google Analytics 4", purpose: "Read web acquisition, engagement, and conversion analytics", risk: "Read-only analytics access" },
+  { slug: "sentry", name: "Sentry", purpose: "Read errors, performance traces, and release health", risk: "Read-only issue and performance access" },
+  { slug: "microsoft_clarity", name: "Microsoft Clarity", purpose: "Read session behaviour and friction signals", risk: "Read-only session analytics access" },
 ] as const;
 
 export type PipedreamAppSlug = (typeof PIPEDREAM_APPS)[number]["slug"];

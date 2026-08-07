@@ -249,12 +249,13 @@ export class AcpxBridge extends EventEmitter {
 
   private updateSession(agentId: string, message: AcpMessage): void {
     const existing = this.sessions.get(agentId);
+    const payload = message.payload as { taskId?: unknown } | undefined;
     const session: AgentSession = {
       employeeId: agentId,
       status: existing?.status || 'CONNECTING',
       lastHeartbeat: new Date(),
       capabilities: existing?.capabilities || [],
-      currentTask: message.payload?.taskId,
+      currentTask: typeof payload?.taskId === 'string' ? payload.taskId : undefined,
       metadata: {
         ...existing?.metadata,
         lastMessageType: message.type,

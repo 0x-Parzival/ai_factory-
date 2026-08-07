@@ -3,11 +3,14 @@ export const DEPARTMENTS = [
   'sales',
   'customer_care',
   'marketing',
+  'influencer_partnerships',
   'product',
+  'backend_engineering',
   'legal',
   'finance',
   'data_analytics',
   'seo_geo_aeo',
+  'cyber_security',
 ] as const;
 
 export type DepartmentId = (typeof DEPARTMENTS)[number] | (string & {});

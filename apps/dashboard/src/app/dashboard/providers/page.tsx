@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrainCircuit, CheckCircle2, KeyRound, Network, ServerCog, TerminalSquare, Unplug } from "lucide-react";
+import { BrainCircuit, CheckCircle2, KeyRound, ServerCog, TerminalSquare, Unplug } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function ProvidersPage() {
   const runtimeStatuses = await getProviderRuntimeStatus();
   const connected = runtimeStatuses.filter((provider) => provider.reachable).length;
+  const configured = runtimeStatuses.filter((provider) => provider.configured).length;
   const discoveredModels = runtimeStatuses.reduce((total, provider) => total + provider.models.length, 0);
   const codexConnected = Boolean(runtimeStatuses.find((provider) => provider.id === "codex")?.reachable);
   return (
@@ -20,14 +21,14 @@ export default async function ProvidersPage() {
         <div>
           <div className="mb-2 flex items-center gap-2">
             <Badge variant="outline">Model routing</Badge>
-            <Badge variant="secondary" className="text-muted-foreground">{connected} connected</Badge>
+            <Badge variant="secondary" className="text-muted-foreground">{connected} connected · {configured} configured</Badge>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">AI Providers</h1>
           <p className="mt-1 max-w-3xl text-muted-foreground">
             Server-side health checks and model discovery for connection targets that can power any department. Secrets are never sent to the browser.
           </p>
         </div>
-        <Button asChild variant="outline"><Link href="/dashboard/settings"><KeyRound className="mr-2 h-4 w-4" />Integration settings</Link></Button>
+        <Button asChild variant="outline"><Link href="/dashboard/connectors"><KeyRound className="mr-2 h-4 w-4" />Connect business systems</Link></Button>
       </div>
 
       <Card className="border-emerald-500/30 bg-emerald-500/5">
@@ -43,14 +44,7 @@ export default async function ProvidersPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Supported targets</span><Network className="h-5 w-5 text-muted-foreground" /></div>
-            <p className="mt-2 text-3xl font-bold">{MODEL_PROVIDERS.length}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Configuration definitions</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Connected</span><CheckCircle2 className="h-5 w-5 text-muted-foreground" /></div>
@@ -86,18 +80,19 @@ export default async function ProvidersPage() {
               </div>
               {runtime.reachable ? (
                 <Badge variant="success" className="shrink-0 font-normal"><CheckCircle2 className="mr-1 h-3 w-3" />Connected</Badge>
+              ) : runtime.configured ? (
+                <Badge variant="secondary" className="shrink-0 font-normal"><Unplug className="mr-1 h-3 w-3" />Configured</Badge>
               ) : (
-                <Badge variant="secondary" className="shrink-0 font-normal text-muted-foreground"><Unplug className="mr-1 h-3 w-3" />Not connected</Badge>
+                <Badge variant="secondary" className="shrink-0 font-normal text-muted-foreground"><Unplug className="mr-1 h-3 w-3" />Not configured</Badge>
               )}
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-2 rounded-lg bg-muted/40 p-3 text-center">
+              <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/40 p-3 text-center">
                 <div><p className="font-semibold">{runtime.reachable ? `${runtime.latencyMs} ms` : "—"}</p><p className="text-[11px] text-muted-foreground">Endpoint health</p></div>
                 <div><p className="font-semibold">{runtime.models.length}</p><p className="text-[11px] text-muted-foreground">Models found</p></div>
-                <div><p className="font-semibold">0</p><p className="text-[11px] text-muted-foreground">Routes</p></div>
               </div>
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                {runtime.detail}. {runtime.reachable ? "This status comes from a live server-side health check." : "Configure secure credential storage before enabling this provider."}
+                {runtime.detail}. {runtime.reachable ? "This status comes from a live server-side health check." : runtime.configured ? "Credentials are present; this provider has not passed a live health check yet." : "Configure secure credentials before using this provider."}
               </p>
             </CardContent>
           </Card>

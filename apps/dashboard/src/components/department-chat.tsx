@@ -28,15 +28,20 @@ type DepartmentChatProps = {
   departmentName: string;
   providers: ChatProviderOption[];
   authenticationConfigured: boolean;
+  enableDatabaseActions?: boolean;
+  mode?: "lead_generation";
+  preferredProvider?: string;
 };
 
-export function DepartmentChat({ departmentSlug, departmentName, providers, authenticationConfigured }: DepartmentChatProps) {
+export function DepartmentChat({ departmentSlug, departmentName, providers, authenticationConfigured, enableDatabaseActions = false, mode, preferredProvider }: DepartmentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
-  const [provider, setProvider] = useState(providers[0]?.id || "");
-  const [model, setModel] = useState(providers[0]?.models[0] || "");
+  const initialProvider = providers.find((option) => option.id === preferredProvider) || providers[0];
+  const [provider, setProvider] = useState(initialProvider?.id || "");
+  const [model, setModel] = useState(initialProvider?.models[0] || "");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
+  const [databaseAction, setDatabaseAction] = useState<string>();
 
   const selectedProvider = useMemo(
     () => providers.find((option) => option.id === provider),
@@ -68,6 +73,7 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
         body: JSON.stringify({
           provider,
           ...(model ? { model } : {}),
+          ...(mode ? { mode } : {}),
           messages: nextMessages.map(({ role, content: messageContent }) => ({ role, content: messageContent })),
         }),
       });
@@ -98,6 +104,22 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
     }
   }
 
+  async function runProposedSql(sql: string) {
+    const write = !/^(select|with|show|explain|values)\b/i.test(sql.trim());
+    if (!window.confirm(write ? "Apply this database change? This may modify production data or schema." : "Run this database query?")) return;
+    setDatabaseAction("Running proposed SQL…");
+    try {
+      const response = await fetch("/api/backend-engineering/sql", { method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ sql, ...(write ? { confirmWrite: true } : {}) }) });
+      const body = await response.text();
+      let payload: { error?: string; rowCount?: number };
+      try { payload = JSON.parse(body) as { error?: string; rowCount?: number }; } catch {
+        throw new Error(response.status === 401 || response.status === 403 || body.includes("<!DOCTYPE") ? "Your session needs attention. Sign in again, then retry." : "The server returned an unexpected response while running the database task.");
+      }
+      if (!response.ok) throw new Error(payload.error || "Database task failed.");
+      setDatabaseAction(`Database task completed: ${payload.rowCount || 0} row(s) affected or returned.`);
+    } catch (actionError) { setDatabaseAction(actionError instanceof Error ? actionError.message : "Database task failed."); }
+  }
+
   return (
     <Card id="department-chat">
       <CardHeader className="space-y-3">
@@ -107,7 +129,9 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
               <MessageSquareText className="h-5 w-5" /> Talk to {departmentName}
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Replies come from the selected live model using this department&apos;s defined purpose and powers.
+              {mode === "lead_generation"
+                ? "Enter one complete search objective. The model will return a truthful research plan and identify any missing integrations."
+                : "Replies come from the selected live model using this department&apos;s defined purpose and powers."}
             </p>
           </div>
           <Badge variant={providers.length && authenticationConfigured ? "outline" : "secondary"}>
@@ -158,6 +182,10 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
                 {message.role === "assistant" && message.model && (
                   <p className="mt-2 border-t pt-1 text-[11px] text-muted-foreground">{message.provider} · {message.model}</p>
                 )}
+                {enableDatabaseActions && message.role === "assistant" && (() => {
+                  const sql = message.content.match(/```sql\s*([\s\S]*?)```/i)?.[1]?.trim();
+                  return sql ? <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => void runProposedSql(sql)}>Run proposed SQL</Button> : null;
+                })()}
               </div>
               {message.role === "user" && <UserRound className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />}
             </div>
@@ -170,6 +198,7 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
         </div>
 
         {error && <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+        {databaseAction && <p className="rounded-md border px-3 py-2 text-sm text-muted-foreground">{databaseAction}</p>}
 
         <form onSubmit={(event) => void sendMessage(event)} className="space-y-2">
           <Textarea
@@ -178,7 +207,11 @@ export function DepartmentChat({ departmentSlug, departmentName, providers, auth
             onKeyDown={handleKeyDown}
             maxLength={4_000}
             rows={3}
-            placeholder={!authenticationConfigured ? "Configure secure login to enable chat" : providers.length ? `Message ${departmentName}…` : "Connect a model provider to enable chat"}
+            placeholder={!authenticationConfigured
+              ? "Configure secure login to enable chat"
+              : providers.length
+                ? mode === "lead_generation" ? "e.g. Find SaaS founders in the US with 10–100 employees who recently raised funding…" : `Message ${departmentName}…`
+                : "Connect a model provider to enable chat"}
             disabled={sending || providers.length === 0 || !authenticationConfigured}
             aria-label={`Message ${departmentName}`}
           />

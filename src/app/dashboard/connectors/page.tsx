@@ -1,0 +1,23 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { CheckCircle2, KeyRound, PlugZap, X } from "lucide-react";
+
+type Connector = { id: string; name: string; detail: string; fields: string[] };
+const connectors: Connector[] = [
+  { id: "razorpay", name: "Razorpay", detail: "Read verified payments, refunds and settlements.", fields: ["Key ID", "Key secret"] },
+  { id: "paypal", name: "PayPal", detail: "Read verified transaction and payout activity.", fields: ["Client ID", "Client secret"] },
+  { id: "crypto", name: "Coinbase Commerce", detail: "Read completed crypto checkout charges.", fields: ["API key"] },
+  { id: "instagram", name: "Instagram Business", detail: "Official account, publishing and eligible inbox access.", fields: ["Access token"] },
+  { id: "linkedin", name: "LinkedIn", detail: "Official company account and approved partner workflows.", fields: ["Client ID", "Client secret", "Access token"] },
+  { id: "youtube", name: "YouTube", detail: "Channel publishing and performance reporting.", fields: ["Client ID", "Client secret", "Refresh token"] },
+  { id: "x", name: "X / Twitter", detail: "Official account distribution and eligible conversations.", fields: ["API key", "API secret", "Access token"] },
+  { id: "database", name: "Spiritual AI referral database", detail: "Read referral owners, purchases, commissions and payout status.", fields: ["Read-only database URL"] },
+  { id: "llm", name: "LLM provider", detail: "Power department planning, analysis and draft creation.", fields: ["API base URL", "API key", "Model"] },
+];
+export default function ConnectorsPage() {
+  const [connected, setConnected] = useState<string[]>([]); const [current, setCurrent] = useState<Connector | null>(null); const [saved, setSaved] = useState(false);
+  useEffect(() => { setConnected(JSON.parse(window.localStorage.getItem("factory-connector-drafts") || "[]")); }, []);
+  function save() { if (!current) return; const next = Array.from(new Set([...connected, current.id])); setConnected(next); window.localStorage.setItem("factory-connector-drafts", JSON.stringify(next)); setSaved(true); setTimeout(() => { setSaved(false); setCurrent(null); }, 700); }
+  return <div className="p-8"><div className="mb-8"><p className="text-sm text-violet-400">FACTORY CONNECTIONS</p><h1 className="mt-2 text-3xl font-bold">Connectors</h1><p className="mt-1 max-w-2xl text-slate-400">Connect the systems used by the Factory. Connection drafts are saved only in this browser until a secure server-side secret store is configured.</p></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{connectors.map((connector) => { const isConnected = connected.includes(connector.id); return <div key={connector.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5"><PlugZap className="w-5 h-5 text-violet-400" /><div className="mt-5 flex items-start justify-between gap-3"><div><h2 className="font-semibold">{connector.name}</h2><p className="mt-2 text-sm leading-6 text-slate-400">{connector.detail}</p></div>{isConnected && <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />}</div><button onClick={() => setCurrent(connector)} className={`mt-5 w-full rounded-lg px-3 py-2 text-sm font-medium ${isConnected ? "border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10" : "bg-violet-600 hover:bg-violet-500"}`}>{isConnected ? "Review connection" : "Connect"}</button></div>; })}</div>{current && <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4"><div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"><div className="flex items-start justify-between"><div><p className="text-xs text-violet-400">CONNECTION SETUP</p><h2 className="mt-1 text-xl font-semibold">{current.name}</h2></div><button onClick={() => setCurrent(null)} className="text-slate-400 hover:text-white"><X /></button></div><p className="mt-3 text-sm text-slate-400">Use least-privilege, read-only credentials where possible. Values are never displayed after entry.</p><div className="mt-5 space-y-3">{current.fields.map((field) => <label key={field} className="block text-sm text-slate-300">{field}<input type={field.toLowerCase().includes("url") ? "url" : "password"} placeholder={field.toLowerCase().includes("url") ? "https://…" : "Enter securely"} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-violet-500" /></label>)}</div><button onClick={save} className="mt-6 w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium hover:bg-violet-500"><KeyRound className="mr-2 inline w-4 h-4" />{saved ? "Saved" : "Save connection draft"}</button></div></div>}</div>;
+}

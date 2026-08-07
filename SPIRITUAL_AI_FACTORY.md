@@ -4,7 +4,7 @@ This repository implements a control plane for a real multi-agent spiritual AI c
 
 ## Company structure
 
-The CEO Orchestrator owns strategy, prioritization, cross-department delegation, budgets, loop health, and owner escalation. It coordinates Sales, Customer Care, Marketing & Growth, Product Management & Studio, Legal & Compliance, Finance, Data Science & Analytics, and SEO/GEO/AEO. Reliability and spiritual-safety rules are cross-company controls enforced for every department rather than unstaffed department placeholders.
+The CEO Orchestrator owns strategy, prioritization, cross-department delegation, budgets, loop health, and owner escalation. It coordinates Sales, Customer Care, Marketing & Growth, Influencer Partnerships, Product Management & Studio, Backend Engineering & Data Operations, Legal & Compliance, Finance, Data Science & Analytics, and SEO/GEO/AEO. Reliability and spiritual-safety rules are cross-company controls enforced for every department rather than unstaffed department placeholders.
 
 Each department has an explicit capability boundary. A department may research, plan, draft, analyze, and operate its own approved systems. It cannot silently inherit credentials or powers from another department. Provider choice is independent of department authority: Codex/OpenAI, Claude, Hermes, Ollama, OpenRouter, Groq, and NVIDIA can power any department, but tools and external actions are still restricted by that department's policy.
 
@@ -72,13 +72,13 @@ Dashboard and model access uses Clerk with server-side resource checks. Configur
 2. Configure one model provider and verify health/model discovery.
 3. Set the company objective, currency, monthly budget, timezone, jurisdictions, and safety policy.
 4. Configure Telegram owner escalation.
-5. Activate Legal, Finance, Analytics, and SEO/GEO/AEO in read-only or draft-only mode. Search Console access must use a read-only OAuth grant.
-6. Activate Product, Marketing, Customer Care, and Sales with draft-only external actions while cross-company reliability and spiritual-safety policies remain enforced.
+5. Activate Backend Engineering, Legal, Finance, Analytics, and SEO/GEO/AEO in read-only or draft-only mode. Neon access must use a dedicated least-privilege read-only role and Search Console access must use a read-only OAuth grant.
+6. Activate Product, Marketing, Influencer Partnerships, Customer Care, and Sales with draft-only external actions while cross-company reliability and spiritual-safety policies remain enforced.
 7. Test approval, audit, retry, idempotency, emergency stop, and credential rotation.
 8. Enable selected external actions after channel-specific consent and compliance review.
 
 ## Local safe worker
 
-The included local worker deploys one Ollama-backed agent for each of the nine dashboard departments. It runs recurring, non-overlapping internal research and operating-review loops with token budgets, idempotency, retries, dead letters, and stop controls. The SEO/GEO/AEO loop creates evidence requirements, analysis plans, answer-first briefs, and structured-data drafts; it does not invent traffic or publish changes. The worker cannot contact people, publish, move money, access account data, or perform any other external action. Its process status is written to a local mode-0600 file and the dashboard ignores stale or dead processes, so it never presents old activity as live.
+The included local worker deploys one Ollama-backed agent for each of the twelve dashboard departments. It runs recurring, non-overlapping internal research and operating-review loops with token budgets, idempotency, retries, dead letters, and stop controls. The Backend Engineering loop produces only read-only Neon integration and data-quality plans until an approved connector supplies real evidence; the SEO/GEO/AEO loop creates evidence requirements, analysis plans, answer-first briefs, and structured-data drafts. Neither invents live data nor publishes changes. The worker cannot contact people, publish, move money, access account data, or perform any other external action. Its process status is written to a local mode-0600 file and the dashboard ignores stale or dead processes, so it never presents old activity as live.
 
 The dashboard at `http://localhost:3001` reports live worker and provider state when reachable, and honest zeros and unconfigured states otherwise.

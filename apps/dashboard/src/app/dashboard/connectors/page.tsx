@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlatformConnections } from "@/components/platform-connections";
 import { isClerkConfigured } from "@/lib/auth-config";
 import { COMPOSIO_TOOLKITS, isComposioConfigured } from "@/lib/composio";
+import { isPipedreamConfigured, PIPEDREAM_APPS } from "@/lib/pipedream";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function ConnectorsPage() {
   const configured = connectors.filter((connector) => connector.readiness.configured).length;
   const authConfigured = isClerkConfigured();
   const composioConfigured = isComposioConfigured();
+  const pipedreamConfigured = isPipedreamConfigured();
   const infrastructureHealth = await agentInfrastructureFromEnv().health();
 
   return (
@@ -32,6 +34,13 @@ export default async function ConnectorsPage() {
         apps={COMPOSIO_TOOLKITS.map((app) => ({ ...app }))}
         configured={composioConfigured}
         authenticationConfigured={authConfigured}
+      />
+
+      <PlatformConnections
+        apps={PIPEDREAM_APPS.map((app) => ({ ...app }))}
+        configured={pipedreamConfigured}
+        authenticationConfigured={authConfigured}
+        gateway="pipedream"
       />
 
       <Card className="border-amber-500/30 bg-amber-500/5">

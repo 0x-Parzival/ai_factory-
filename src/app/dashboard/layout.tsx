@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Bot, Users, Workflow, Store, Settings, BarChart3, MessageSquare } from "lucide-react";
+import { Bot, Users, Store, Settings, BarChart3, MessageSquare, Building2, Cable } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", icon: BarChart3, label: "Overview" },
+  { href: "/dashboard/departments", icon: Building2, label: "Departments" },
   { href: "/dashboard/agents", icon: Bot, label: "Agents" },
   { href: "/dashboard/personas", icon: Users, label: "Persona Studio" },
-  { href: "/dashboard/workflows", icon: Workflow, label: "Workflows" },
   { href: "/dashboard/conversations", icon: MessageSquare, label: "Conversations" },
   { href: "/dashboard/marketplace", icon: Store, label: "Marketplace" },
+  { href: "/dashboard/connectors", icon: Cable, label: "Connectors" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 

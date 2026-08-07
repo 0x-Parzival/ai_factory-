@@ -11,6 +11,7 @@ export type ConnectorCategory =
   | "ANALYTICS"
   | "CONTENT"
   | "STORAGE"
+  | "DATABASE"
   | "COMPUTE"
   | "LEGAL_RESEARCH";
 
@@ -27,6 +28,15 @@ export interface ConnectorDefinition {
 
 export const CONNECTOR_CATALOG: ConnectorDefinition[] = [
   {
+    id: "neon-postgres-readonly",
+    name: "Neon PostgreSQL (read-only)",
+    category: "DATABASE",
+    departments: ["backend-engineering", "data-analytics", "finance", "ceo"],
+    requiredSecrets: ["NEON_READONLY_DATABASE_URL"],
+    actions: ["analytics.read"],
+    notes: "Use a separate Neon role restricted to SELECT on explicitly approved schemas or views. Do not use the application DATABASE_URL, expose this URL to the browser, or grant write, DDL, ownership, replication, or secret-table access.",
+  },
+  {
     id: "agentmail",
     name: "AgentMail",
     category: "EMAIL",
@@ -40,7 +50,7 @@ export const CONNECTOR_CATALOG: ConnectorDefinition[] = [
     id: "composio",
     name: "Composio Managed OAuth",
     category: "CONTENT",
-    departments: ["ceo", "sales", "customer-care", "marketing", "product-management", "finance", "data-analytics", "seo-geo-aeo"],
+    departments: ["ceo", "sales", "customer-care", "marketing", "product-management", "backend-engineering", "finance", "data-analytics", "seo-geo-aeo"],
     requiredSecrets: ["COMPOSIO_API_KEY", "COMPOSIO_ACTION_TOOL_ALLOWLIST", "COMPOSIO_TOOLKIT_VERSIONS"],
     optionalSecrets: ["COMPOSIO_ALLOWED_TOOLKITS"],
     actions: ["research.read", "analytics.read", "content.draft", "email.read", "email.send", "social.publish", "social.message", "customer.record.update", "payment.create", "payment.refund", "account.connect"],
@@ -59,7 +69,7 @@ export const CONNECTOR_CATALOG: ConnectorDefinition[] = [
     id: "firecrawl",
     name: "Firecrawl Web Data",
     category: "CONTENT",
-    departments: ["ceo", "sales", "marketing", "product-management", "data-analytics", "seo-geo-aeo"],
+    departments: ["ceo", "sales", "marketing", "product-management", "data-analytics", "seo-geo-aeo", "market-research"],
     requiredSecrets: ["FIRECRAWL_API_KEY"],
     actions: ["research.read"],
     notes: "Public-web search and single-page extraction only. Private, local, credential-bearing, and non-HTTPS targets are rejected; bulk crawling and browser interaction are not exposed.",
@@ -68,7 +78,7 @@ export const CONNECTOR_CATALOG: ConnectorDefinition[] = [
     id: "e2b",
     name: "E2B Ephemeral Sandbox",
     category: "COMPUTE",
-    departments: ["ceo", "product-management", "data-analytics", "finance"],
+    departments: ["ceo", "product-management", "backend-engineering", "data-analytics", "finance"],
     requiredSecrets: ["E2B_API_KEY"],
     optionalSecrets: ["E2B_TEMPLATE"],
     actions: ["code.execute"],

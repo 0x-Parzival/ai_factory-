@@ -1,72 +1,21 @@
-import { Bot, MessageSquare, Workflow, Users, TrendingUp, Clock } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { Activity, ArrowRight, Building2, CheckCircle2, CircleDollarSign, Clock, Radio, Users } from "lucide-react";
+
+const departments = [
+  ["CEO Orchestrator", "ceo", "online", "Operating review & priorities"], ["Sales", "sales", "online", "Pipeline review"], ["Marketing & Growth", "marketing", "online", "Content research"], ["Influencer Partnerships", "influencers", "offline", "Awaiting platform connection"], ["Customer Care", "care", "offline", "No active task"], ["Product Studio", "product", "online", "Product discovery review"], ["Backend & Data", "backend", "online", "Data readiness review"], ["Finance", "finance", "offline", "Awaiting payment connections"], ["SEO / GEO / AEO", "seo", "online", "Search opportunity review"], ["Legal & Compliance", "legal", "offline", "No active task"]
+];
+const events = [
+  ["09:42", "Backend & Data", "Completed data readiness review"], ["09:38", "Marketing & Growth", "Started content research task"], ["09:31", "CEO Orchestrator", "Created operating-priority brief"], ["09:19", "SEO / GEO / AEO", "Queued search opportunity review"], ["09:10", "Sales", "Updated pipeline research plan"]
+];
+const paymentSources = [{ name: "Razorpay", amount: 0, color: "bg-sky-400" }, { name: "Crypto", amount: 0, color: "bg-amber-400" }, { name: "PayPal", amount: 0, color: "bg-blue-500" }];
 
 export default function DashboardPage() {
-  return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-slate-400 mt-1">Welcome back. Here&apos;s your AI team overview.</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: "Active Agents", value: "0", icon: Bot, color: "text-violet-400", bg: "bg-violet-500/10" },
-          { label: "Messages Today", value: "0", icon: MessageSquare, color: "text-blue-400", bg: "bg-blue-500/10" },
-          { label: "Workflows Run", value: "0", icon: Workflow, color: "text-green-400", bg: "bg-green-500/10" },
-          { label: "Team Members", value: "1", icon: Users, color: "text-orange-400", bg: "bg-orange-500/10" },
-        ].map((stat) => (
-          <div key={stat.label} className="p-5 rounded-xl bg-slate-900 border border-slate-800">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-slate-400">{stat.label}</span>
-              <div className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-              </div>
-            </div>
-            <div className="text-3xl font-bold">{stat.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="p-6 rounded-xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-violet-500/20">
-          <h3 className="font-semibold mb-2">Deploy Your First Agent</h3>
-          <p className="text-sm text-slate-300 mb-4">
-            Browse 800+ specialist personas and deploy one to your preferred channel in minutes.
-          </p>
-          <a
-            href="/dashboard/personas"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-sm font-medium transition"
-          >
-            Browse Persona Studio
-          </a>
-        </div>
-        <div className="p-6 rounded-xl bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-500/20">
-          <h3 className="font-semibold mb-2">Build a Workflow</h3>
-          <p className="text-sm text-slate-300 mb-4">
-            Create deterministic multi-step pipelines with approval gates and resumable execution.
-          </p>
-          <a
-            href="/dashboard/workflows"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-medium transition"
-          >
-            Create Workflow
-          </a>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="rounded-xl bg-slate-900 border border-slate-800 p-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-slate-400" />
-          Recent Activity
-        </h3>
-        <div className="text-center py-12 text-slate-500">
-          <Bot className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>No activity yet. Deploy an agent to get started!</p>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="p-8 space-y-7">
+    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><p className="flex items-center gap-2 text-sm text-emerald-400"><Radio className="w-3.5 h-3.5" /> Factory control room</p><h1 className="mt-2 text-3xl font-bold">Spiritual AI Factory</h1><p className="text-slate-400 mt-1">Revenue, agents, departments and live factory activity.</p></div><Link href="/dashboard/connectors" className="inline-flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium hover:bg-violet-500">Connect business systems <ArrowRight className="w-4 h-4" /></Link></header>
+    <section className="grid gap-4 xl:grid-cols-[1.5fr_.8fr]"><div className="rounded-xl border border-slate-800 bg-slate-900 p-6"><div className="flex items-start justify-between"><div><p className="text-sm text-slate-400">Verified earnings</p><h2 className="mt-1 text-3xl font-bold">$0</h2><p className="mt-1 text-xs text-slate-500">Connect payment providers to show actual revenue.</p></div><CircleDollarSign className="w-6 h-6 text-violet-400" /></div><div className="mt-7 flex h-48 items-end justify-around gap-8 border-b border-slate-800 px-6">{paymentSources.map((source) => <div key={source.name} className="flex h-full flex-1 flex-col justify-end"><div className={`min-h-1 rounded-t-lg ${source.color}`} style={{ height: source.amount ? `${Math.max(source.amount, 8)}%` : "4px" }} /><p className="mt-3 text-center text-sm font-medium">{source.name}</p><p className="text-center text-xs text-slate-500">$0 · not connected</p></div>)}</div></div><div className="rounded-xl border border-slate-800 bg-slate-900 p-6"><p className="text-sm text-slate-400">Payment sources</p><div className="mt-4 space-y-3">{paymentSources.map((source) => <Link key={source.name} href="/dashboard/connectors" className="flex items-center justify-between rounded-lg bg-slate-800/70 p-3 hover:bg-slate-800"><span className="flex items-center gap-2"><span className={`w-2.5 h-2.5 rounded-full ${source.color}`} />{source.name}</span><span className="text-xs text-slate-400">Connect →</span></Link>)}</div></div></section>
+    <section className="grid gap-4 xl:grid-cols-[1.15fr_.85fr]"><div className="rounded-xl border border-slate-800 bg-slate-900 p-6"><h2 className="flex items-center gap-2 font-semibold"><Activity className="w-5 h-5 text-violet-400" /> Factory activity log</h2><p className="mt-1 text-sm text-slate-400">What each department is doing right now.</p><div className="mt-5 space-y-2">{events.map(([time, department, task]) => <div key={`${time}-${department}`} className="flex items-center gap-4 rounded-lg border border-slate-800 px-3 py-3"><time className="text-xs text-slate-500">{time}</time><span className="h-2 w-2 rounded-full bg-emerald-400" /><div><p className="text-sm font-medium">{department}</p><p className="text-xs text-slate-400">{task}</p></div></div>)}</div></div><div className="rounded-xl border border-slate-800 bg-slate-900 p-6"><h2 className="flex items-center gap-2 font-semibold"><Users className="w-5 h-5 text-violet-400" /> Department status</h2><div className="mt-5 space-y-2">{departments.map(([name, id, status, task]) => <Link href={id === "ceo" ? "/dashboard/departments/ceo" : "/dashboard/departments"} key={id} className="flex items-center justify-between rounded-lg border border-slate-800 px-3 py-2.5 hover:bg-slate-800"><div><p className="text-sm font-medium">{name}</p><p className="text-xs text-slate-500">{task}</p></div><span className={`rounded-full px-2 py-1 text-xs ${status === "online" ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-800 text-slate-400"}`}>{status}</span></Link>)}</div></div></section>
+    <section className="grid gap-4 md:grid-cols-2"><Link href="/dashboard/departments/ceo" className="rounded-xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-fuchsia-600/10 p-6 hover:border-violet-400"><Building2 className="w-8 h-8 text-violet-300" /><h2 className="mt-5 text-xl font-semibold">CEO Cabin</h2><p className="mt-1 text-sm text-slate-300">Open executive strategy, priorities, approvals and cross-department direction.</p><span className="mt-5 inline-flex items-center gap-2 text-sm text-violet-300">Enter cabin <ArrowRight className="w-4 h-4" /></span></Link><Link href="/dashboard/departments" className="rounded-xl border border-slate-800 bg-slate-900 p-6 hover:border-slate-700"><CheckCircle2 className="w-8 h-8 text-emerald-400" /><h2 className="mt-5 text-xl font-semibold">All Departments</h2><p className="mt-1 text-sm text-slate-400">Explore each department, its current role, systems and operating state.</p><span className="mt-5 inline-flex items-center gap-2 text-sm text-slate-300">View departments <ArrowRight className="w-4 h-4" /></span></Link></section>
+  </div>;
 }

@@ -23,6 +23,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# local agent/runtime secrets and editor state
+.factory-secrets/
+.codex/
+
 # separately versioned GPL service
 /services/openoutreach-spiritualai/
 

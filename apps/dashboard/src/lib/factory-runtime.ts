@@ -12,6 +12,7 @@ export type ProviderRuntimeStatus = {
   models: string[];
   latencyMs?: number;
   detail: string;
+  rateLimit?: string;
 };
 
 export type WorkerRuntimeStatus = {
@@ -127,6 +128,9 @@ export async function getProviderRuntimeStatus(): Promise<ProviderRuntimeStatus[
       reachable: false,
       models: [],
       detail: configured ? "Credential configured; health check not run" : "Credentials not configured",
+      rateLimit: provider.id === "groq" && configured
+        ? "Account quota is not exposed by a safe health check; remaining request limits appear after a Groq inference response."
+        : undefined,
     };
   });
 }
